@@ -1,6 +1,4 @@
-# Importing libraries
 import tkinter as tk
-from tkinter import Label
 from tkinter import filedialog
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
@@ -42,16 +40,27 @@ def watermarkImage(inputText):
 
     img = Image.new("RGBA", uploaded_image.size)
     draw = ImageDraw.Draw(img)
-    font = ImageFont.truetype("arial.ttf", size=90)
+    max_font_size = int(min(img_width, img_height) * 0.1)
+    font_size = max_font_size
+    font = ImageFont.truetype("arial.ttf", font_size)
 
-    bbox = draw.textbbox((0, 0), inputText, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    while True:
+        bbox = draw.textbbox((0, 0), inputText, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+
+        if text_width <= img_width * 0.9 and text_height <= img_height * 0.9:
+            break
+        font_size -= 1
+        if font_size < 10:
+            break
+        font = ImageFont.truetype("arial.ttf", font_size)
+
+        # Center the text
     x = (img_width - text_width) // 2
     y = (img_height - text_height) // 2
 
-    draw.text((x,y), inputText, font=font, fill=(0, 0, 0, 255))
-
+    draw.text((x, y), inputText, font=font, fill=(0, 0, 0, 128))
 
     uploaded_image.paste(img, (0, 0), img)
     pic = ImageTk.PhotoImage(uploaded_image)
@@ -79,9 +88,6 @@ if __name__ == "__main__":
 
     uploadButton = tk.Button(window, text="Upload Image", command=imageUploader)
     uploadButton.pack(padx=20, pady=20)
-
-    # my_label = Label(window, text="Watermark Text To Add:", font=("Arial", 10, "bold"))
-    # my_label.pack(padx=20, pady=20)
 
     center_frame = tk.Frame(window)
     center_frame.pack(pady=10)
